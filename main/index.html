@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu Hình Robot Xiaozhi</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background-color: #121212; 
+            color: #ffffff; 
+            max-width: 500px;
+            margin: auto;
+        }
+
+        fieldset {
+            border: 1px solid #555555;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #1e1e1e;
+        }
+
+        legend {
+            font-weight: bold;
+            color: #4CAF50; 
+            padding: 0 10px;
+        }
+
+        .form-group { 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+        }
+
+        label { 
+            font-weight: bold; 
+            font-size: 14px;
+        }
+
+        select { 
+            background-color: #333333;
+            color: #ffffff;
+            border: 1px solid #555555;
+            padding: 6px; 
+            border-radius: 4px;
+            width: 120px;
+        }
+
+        button { 
+            background-color: #4CAF50; 
+            color: white;
+            border: none;
+            padding: 12px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">Thiết Lập Chân GPIO</h2>
+    <form>
+        <!-- Cụm cấu hình Màn hình -->
+        <fieldset>
+            <legend>Màn Hình LCD (ST7789)</legend>
+            <div class="form-group">
+                <label for="lcd_mosi">MOSI (SDA):</label>
+                <select id="lcd_mosi" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label for="lcd_sclk">SCLK (SCK):</label>
+                <select id="lcd_sclk" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label for="lcd_dc">DC:</label>
+                <select id="lcd_dc" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label for="lcd_res">RES (Reset):</label>
+                <select id="lcd_res" class="pin-select"></select>
+            </div>
+        </fieldset>
+
+        <!-- Cụm cấu hình Âm thanh (Gộp chung I2S) -->
+        <fieldset>
+            <legend>Âm Thanh (Chung I2S Bus)</legend>
+            <div class="form-group">
+                <label title="Nối chung chân WS của Mic và LRC của Loa" for="i2s_ws">WS / LRC (Đồng bộ):</label>
+                <select id="i2s_ws" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label title="Nối chung chân SCK của Mic và BCLK của Loa" for="i2s_sck">SCK / BCLK (Xung nhịp):</label>
+                <select id="i2s_sck" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label title="Chân nhận dữ liệu của Loa (MAX98357A)" for="i2s_dout">DIN (Dữ liệu ra Loa):</label>
+                <select id="i2s_dout" class="pin-select"></select>
+            </div>
+            <div class="form-group">
+                <label title="Chân xuất dữ liệu của Mic (INMP441)" for="i2s_din">SD (Dữ liệu từ Mic):</label>
+                <select id="i2s_din" class="pin-select"></select>
+            </div>
+        </fieldset>
+
+        <button type="button">Lưu Cấu Hình</button>
+    </form>
+
+    <script>
+        const selects = document.querySelectorAll('.pin-select');
+        selects.forEach(select => {
+            let defaultOpt = document.createElement('option');
+            defaultOpt.value = -1;
+            defaultOpt.text = "-- Trống --";
+            select.appendChild(defaultOpt);
+
+            for (let i = 0; i <= 48; i++) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.text = "GPIO " + i;
+                select.appendChild(option);
+            }
+        });
+        // Bổ sung sự kiện khi bấm nút Lưu Cấu Hình
+        document.querySelector('button').addEventListener('click', async (event) => {
+            const formData = new URLSearchParams();
+            selects.forEach(sel => {
+                formData.append(sel.id, sel.value);
+            });
+
+            try {
+                let response = await fetch('/save', {
+                    method: 'POST',
+                    body: formData
+                });
+                let result = await response.text();
+                alert(result);
+            } catch (error) {
+        alert('Lỗi kết nối tới thiết bị!');
+    }
+}); // Thêm dòng này để đóng sự kiện click
+</script>
+</body>
+</html>
